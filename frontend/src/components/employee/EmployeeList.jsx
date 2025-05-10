@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AddEmployee from './AddEmployee';
 import ViewEmployee from './ViewEmployee';
 import EditEmployee from './EditEmployee';
+import EditSalary from './EditSalary';
 const { VITE_API_URL } = import.meta.env || 'http://localhost:5000';
 
 const EmployeeList = () => {
@@ -9,7 +10,7 @@ const EmployeeList = () => {
     const [search, setSearch] = useState('');
     const [showDialog, setShowDialog] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalEmployees, setTotalEmployees] = useState(0);
@@ -17,15 +18,21 @@ const EmployeeList = () => {
     const [viewEmployee, setViewEmployee] = useState(null);
     const [editEmployee, setEditEmployee] = useState(null);
     const [departments, setDepartments] = useState([]);
+    const [salaries, setSalaries] = useState([]);
+    const [showSalaryModal, setShowSalaryModal] = useState(false);
+    const [salaryInitialData, setSalaryInitialData] = useState({});
+    const [salaryEditId, setSalaryEditId] = useState(null);
 
     useEffect(() => {
         fetchEmployees();
         fetchDepartments();
+        fetchSalaries();
     }, [currentPage]);
 
     const fetchEmployees = async () => {
         try {
             setLoading(true);
+            setErrorMessage('');
             const response = await fetch(
                 `${VITE_API_URL}/api/employee?page=${currentPage}&limit=${employeesPerPage}`,
                 {
@@ -35,46 +42,177 @@ const EmployeeList = () => {
                     }
                 }
             );
-            if (!response.ok) throw new Error('Failed to fetch employees');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message || 'Failed to fetch employees'
+                );
+            }
             const data = await response.json();
             setEmployees(data.employees);
             setTotalPages(data.totalPages);
             setTotalEmployees(data.totalEmployees);
         } catch (err) {
-            setError('Failed to load employees');
+            setErrorMessage(err.message || 'Failed to load employees');
+            console.error('Failed to fetch employees:', err);
         } finally {
             setLoading(false);
         }
     };
 
     const fetchDepartments = async () => {
-        const res = await fetch(`${VITE_API_URL}/api/department`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+        try {
+            setErrorMessage('');
+            const res = await fetch(`${VITE_API_URL}/api/department`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(
+                    errorData.message || 'Failed to fetch departments'
+                );
             }
-        });
-        const data = await res.json();
-
-        console.log('fetchDepartment : == ', data);
-        setDepartments(data.departments || data);
+            const data = await res.json();
+            setDepartments(data.departments || data);
+        } catch (err) {
+            setErrorMessage(err.message || 'Failed to load departments');
+            console.error('Failed to fetch departments:', err);
+        }
     };
 
-    const handleAdd = async formData => {
+    const fetchSalaries = async () => {
+        try {
+            setErrorMessage('');
+            console.log('Fetching salaries...');
+
+            const response = await fetch(
+                `${VITE_API_URL}/api/employee/salary`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            console.log('Salary response:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Salary fetch error details:', errorData);
+                throw new Error(
+                    errorData.message ||
+                        `Failed to fetch salaries: ${response.status} ${response.statusText}`
+                );
+            }
+
+            const data = await response.json();
+            console.log('Salaries data received:', data);
+
+            if (!Array.isArray(data)) {
+                console.error('Invalid salary data format:', data);
+                throw new Error(
+                    'Invalid salary data format received from server'
+                );
+            }
+
+            setSalaries(data);
+        } catch (err) {
+            const errorMsg = err.message || 'Failed to load salaries';
+            setErrorMessage(errorMsg);
+            console.error('Salary fetch error:', {
+                message: err.message,
+                error: err
+            });
+        }
+    };
+
+    const handleAdd = async employeeData => {
         try {
             setLoading(true);
+            setErrorMessage('');
+
+            // Handle image upload if there's an image
+            let finalData = { ...employeeData };
+            console.log('employeelist.jsx finalData == ', finalData);
+            if (employeeData.image) {
+                const data = new FormData();
+                data.append('file', employeeData.image);
+                data.append(
+                    'upload_preset',
+                    import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+                );
+                data.append(
+                    'cloud_name',
+                    import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+                );
+
+                const res = await fetch(
+                    `https://api.cloudinary.com/v1_1/${
+                        import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+                    }/image/upload`,
+                    {
+                        method: 'POST',
+                        body: data
+                    }
+                );
+
+                console.log('employeelist.jsx res == ', res);
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(
+                        errorData.message || 'Failed to upload image'
+                    );
+                }
+
+                const cloudinaryData = await res.json();
+                console.log(
+                    'employeelist.jsx cloudinaryData == ',
+                    cloudinaryData
+                );
+                if (!cloudinaryData.secure_url) {
+                    throw new Error('Failed to get image URL from Cloudinary');
+                }
+                finalData.imageUrl = cloudinaryData.secure_url;
+                delete finalData.image;
+            }
+
+            // Convert data to match backend expectations
+            if (finalData.gender)
+                finalData.gender = finalData.gender.toLowerCase();
+            if (finalData.maritalStatus)
+                finalData.maritalStatus = finalData.maritalStatus.toLowerCase();
+            if (finalData.role) finalData.role = finalData.role.toLowerCase();
+            if (finalData.salary) finalData.salary = Number(finalData.salary);
+
             const response = await fetch(`${VITE_API_URL}/api/employee/add`, {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 },
-                body: formData
+                body: JSON.stringify(finalData)
             });
-            if (!response.ok) throw new Error('Failed to add employee');
-            fetchEmployees();
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to add employee');
+            }
+
+            await fetchEmployees();
             setShowDialog(false);
         } catch (err) {
-            setError('Failed to add employee');
+            setErrorMessage(err.message || 'Failed to add employee');
+            console.error('Failed to add employee:', err);
         } finally {
             setLoading(false);
         }
@@ -83,16 +221,23 @@ const EmployeeList = () => {
     const handleDelete = async id => {
         try {
             setLoading(true);
+            setErrorMessage('');
             const response = await fetch(`${VITE_API_URL}/api/employee/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            if (!response.ok) throw new Error('Failed to delete employee');
-            fetchEmployees();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message || 'Failed to delete employee'
+                );
+            }
+            await fetchEmployees();
         } catch (err) {
-            setError('Failed to delete employee');
+            setErrorMessage(err.message || 'Failed to delete employee');
+            console.error('Failed to delete employee:', err);
         } finally {
             setLoading(false);
         }
@@ -116,7 +261,7 @@ const EmployeeList = () => {
             setViewEmployee(data);
         } catch (err) {
             console.log('handle view is not performed : ', err);
-            setError('Failed to view employee');
+            setErrorMessage('Failed to view employee');
         }
     };
 
@@ -132,39 +277,179 @@ const EmployeeList = () => {
             setEditEmployee(data);
         } catch (err) {
             console.log('handleEdit error is occurred : ', err);
-            setError('failed to edit employee');
+            setErrorMessage('failed to edit employee');
         }
     };
 
     const handleSaveEdit = async updatedData => {
         try {
             setLoading(true);
-            let body, headers;
-            if (updatedData instanceof FormData) {
-                body = updatedData;
-                headers = {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                };
-            } else {
-                body = JSON.stringify(updatedData);
-                headers = {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                };
+            setErrorMessage('');
+
+            // Handle image upload if there's a new image
+            let finalData = { ...updatedData };
+            if (updatedData.image) {
+                const data = new FormData();
+                data.append('file', updatedData.image);
+                data.append(
+                    'upload_preset',
+                    import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+                );
+                data.append(
+                    'cloud_name',
+                    import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+                );
+
+                const res = await fetch(
+                    `https://api.cloudinary.com/v1_1/${
+                        import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+                    }/image/upload`,
+                    {
+                        method: 'POST',
+                        body: data
+                    }
+                );
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(
+                        errorData.message || 'Failed to upload image'
+                    );
+                }
+
+                const cloudinaryData = await res.json();
+                if (!cloudinaryData.secure_url) {
+                    throw new Error('Failed to get image URL from Cloudinary');
+                }
+                finalData.imageUrl = cloudinaryData.secure_url;
+                delete finalData.image;
             }
+
+            // Convert data to match backend expectations
+            if (finalData.gender)
+                finalData.gender = finalData.gender.toLowerCase();
+            if (finalData.maritalStatus)
+                finalData.maritalStatus = finalData.maritalStatus.toLowerCase();
+            if (finalData.role) finalData.role = finalData.role.toLowerCase();
+            if (finalData.salary) finalData.salary = Number(finalData.salary);
+
             const response = await fetch(
                 `${VITE_API_URL}/api/employee/${editEmployee._id}`,
                 {
                     method: 'PUT',
-                    headers,
-                    body
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(finalData)
                 }
             );
-            if (!response.ok) throw new Error('Failed to update employee');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message || 'Failed to update employee'
+                );
+            }
+
             setEditEmployee(null);
-            fetchEmployees();
+            await fetchEmployees();
         } catch (err) {
-            setError('failed to save and edit employee');
+            setErrorMessage(err.message || 'Failed to update employee');
+            console.error('Failed to update employee:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSaveSalary = async form => {
+        try {
+            setLoading(true);
+            setErrorMessage('');
+            let url = `${VITE_API_URL}/api/employee/salary/add`;
+            let method = 'POST';
+            if (salaryEditId) {
+                url = `${VITE_API_URL}/api/employee/salary/${salaryEditId}`;
+                method = 'PUT';
+            }
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(form)
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save salary');
+            }
+            setShowSalaryModal(false);
+            setSalaryEditId(null);
+            await fetchSalaries();
+        } catch (err) {
+            setErrorMessage(err.message || 'Failed to save salary');
+            console.error('Failed to save salary:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSalary = employee => {
+        setSalaryEditId(null);
+        setSalaryInitialData({
+            department: employee.department,
+            employee: employee._id
+        });
+        setShowSalaryModal(true);
+    };
+
+    const handleEditSalary = async salaryId => {
+        try {
+            const response = await fetch(
+                `${VITE_API_URL}/api/employee/salary/${salaryId}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            if (!response.ok) throw new Error('Failed to fetch salary');
+            const data = await response.json();
+            setSalaryEditId(data._id);
+            setSalaryInitialData({
+                department: data.department,
+                employee: data.employee._id,
+                basicSalary: data.basicSalary,
+                allowances: data.allowances,
+                deductions: data.deductions,
+                payDate: data.payDate ? data.payDate.slice(0, 10) : ''
+            });
+            setShowSalaryModal(true);
+        } catch (err) {
+            setErrorMessage('Failed to fetch salary');
+            console.log('failed to fetch salary error : ', err);
+        }
+    };
+
+    const handleDeleteSalary = async id => {
+        try {
+            setLoading(true);
+            const response = await fetch(
+                `${VITE_API_URL}/api/employee/salary/${id}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            if (!response.ok) throw new Error('Failed to delete salary');
+            fetchSalaries();
+        } catch (err) {
+            setErrorMessage('Failed to delete salary');
+            console.log('failed to delete salary error : ', err);
         } finally {
             setLoading(false);
         }
@@ -176,6 +461,11 @@ const EmployeeList = () => {
 
     return (
         <div className="p-4 sm:p-8 min-h-screen bg-gray-50">
+            {errorMessage && (
+                <div className="max-w-5xl mx-auto mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {errorMessage}
+                </div>
+            )}
             <div className="max-w-5xl mx-auto bg-white p-4 sm:p-8 rounded-lg shadow">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
                     <input
@@ -259,7 +549,12 @@ const EmployeeList = () => {
                                         >
                                             Edit
                                         </button>
-                                        <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1.5 rounded transition">
+                                        <button
+                                            onClick={() =>
+                                                handleSalary(emp?._id)
+                                            }
+                                            className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1.5 rounded transition"
+                                        >
                                             Salary
                                         </button>
                                         <button
@@ -344,6 +639,95 @@ const EmployeeList = () => {
                 onClose={() => setEditEmployee(null)}
                 departments={departments}
             />
+            <EditSalary
+                open={showSalaryModal}
+                onClose={() => {
+                    setShowSalaryModal(false);
+                    setSalaryEditId(null);
+                }}
+                onSave={handleSaveSalary}
+                departments={departments}
+                employees={employees}
+                initialData={salaryInitialData}
+            />
+            <div className="mt-10">
+                <h2 className="text-xl font-bold mb-4">Salaries</h2>
+                <div className="overflow-x-auto rounded-md border border-gray-200">
+                    <table className="min-w-full text-sm text-gray-700">
+                        <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                            <tr>
+                                <th className="py-3 px-4">Department</th>
+                                <th className="py-3 px-4">Employee</th>
+                                <th className="py-3 px-4">Basic Salary</th>
+                                <th className="py-3 px-4">Allowances</th>
+                                <th className="py-3 px-4">Deductions</th>
+                                <th className="py-3 px-4">Pay Date</th>
+                                <th className="py-3 px-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {salaries.map(sal => (
+                                <tr
+                                    key={sal._id}
+                                    className="border-b border-gray-200"
+                                >
+                                    <td className="py-3 px-4">
+                                        {sal.department}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        {sal.employee?.name} (
+                                        {sal.employee?.empId})
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        {sal.basicSalary}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        {sal.allowances}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        {sal.deductions}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        {sal.payDate
+                                            ? new Date(
+                                                  sal.payDate
+                                              ).toLocaleDateString()
+                                            : '-'}
+                                    </td>
+                                    <td className="py-3 px-4 flex gap-2">
+                                        <button
+                                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                                            onClick={() =>
+                                                handleEditSalary(sal._id)
+                                            }
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                                            onClick={() =>
+                                                handleDeleteSalary(sal._id)
+                                            }
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {salaries.length === 0 && (
+                                <tr>
+                                    <td
+                                        colSpan={7}
+                                        className="text-center py-6 text-gray-400"
+                                    >
+                                        No salaries found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 };

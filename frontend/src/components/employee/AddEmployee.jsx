@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const GENDERS = ['Male', 'Female', 'Other'];
 const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'];
 const ROLES = ['Admin', 'Manager', 'Employee'];
 
 const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
+    console.log(import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+    console.log(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+
+    const fileInputRef = useRef(null);
+
     const [form, setForm] = useState({
         name: '',
         email: '',
@@ -20,6 +25,7 @@ const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
         image: null
     });
     const [error, setError] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (!open) {
@@ -46,61 +52,108 @@ const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
     const handleChange = e => {
         const { name, value, files } = e.target;
         if (name === 'image') {
-            setForm({ ...form, image: files[0] });
+            if (files && files[0]) {
+                setForm({ ...form, image: files[0] });
+            }
         } else {
             setForm({ ...form, [name]: value });
         }
         setError('');
     };
 
+    const uploadToCloudinary = async file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append(
+            'upload_preset',
+            import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+        );
+        formData.append(
+            'cloud_name',
+            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+        );
+
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${
+                import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+            }/image/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+                errorData.error?.message || 'Failed to upload image'
+            );
+        }
+
+        const data = await response.json();
+        return data.secure_url;
+    };
+
     const handleSubmit = async e => {
         e.preventDefault();
-        for (const key of [
-            'name',
-            'email',
-            'empId',
-            'dob',
-            'gender',
-            'maritalStatus',
-            'department',
-            'designation',
-            'salary',
-            'role',
-            'password'
-        ]) {
-            if (!form[key]) {
-                setError('All fields are required');
-                return;
-            }
-        }
-        let imageUrl = '';
-        if (form.image) {
-            const data = new FormData();
-            data.append('file', form.image);
-            data.append(
-                'upload_preset',
-                import.meta.env.CLOUDINARY_UPLOAD_PRESET
-            );
-            data.append('cloud_name', import.meta.env.CLOUDINARY_CLOUD_NAME);
+        setError('');
+        setIsUploading(true);
 
-            const res = await fetch(
-                `https://api.cloudinary.com/v1_1/${
-                    import.meta.env.CLOUDINARY_CLOUD_NAME
-                }/image/upload`,
-                {
-                    method: 'POST',
-                    body: data
+        try {
+            // Validate required fields
+            for (const key of [
+                'name',
+                'email',
+                'empId',
+                'dob',
+                'gender',
+                'maritalStatus',
+                'department',
+                'designation',
+                'salary',
+                'role',
+                'password'
+            ]) {
+                if (!form[key]) {
+                    throw new Error('All fields are required');
                 }
-            );
-            const cloudinaryData = await res.json();
-            imageUrl = cloudinaryData.secure_url;
+            }
+
+            let imageUrl = '';
+            if (form.image) {
+                try {
+                    imageUrl = await uploadToCloudinary(form.image);
+                } catch (uploadError) {
+                    throw new Error(
+                        `Image upload failed: ${uploadError.message}`
+                    );
+                }
+            }
+
+            // Convert form data to match backend expectations
+            const employeeData = {
+                name: form.name,
+                email: form.email,
+                empId: form.empId,
+                dob: form.dob,
+                gender: form.gender.toLowerCase(),
+                maritalStatus: form.maritalStatus.toLowerCase(),
+                department: form.department,
+                designation: form.designation,
+                salary: Number(form.salary),
+                role: form.role.toLowerCase(),
+                password: form.password,
+                imageUrl
+            };
+
+            await onAdd(employeeData);
+            onClose();
+        } catch (err) {
+            setError(err.message || 'Failed to process form data');
+            console.error('Form submission error:', err);
+        } finally {
+            setIsUploading(false);
         }
-        const formData = new FormData();
-        Object.entries(form).forEach(([key, value]) => {
-            if (key !== 'image' && value) formData.append(key, value);
-        });
-        if (imageUrl) formData.append('imageUrl', imageUrl);
-        onAdd(formData);
     };
 
     return (
@@ -302,6 +355,7 @@ const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
                         <input
                             name="image"
                             type="file"
+                            ref={fileInputRef}
                             accept="image/*"
                             className="w-full"
                             onChange={handleChange}
