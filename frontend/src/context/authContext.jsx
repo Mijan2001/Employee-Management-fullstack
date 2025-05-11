@@ -41,6 +41,11 @@ const AuthContext = ({ children }) => {
         verifyUser();
     }, []);
 
+    const register = (user, token) => {
+        setUser(user);
+        if (token) localStorage.setItem('token', token);
+    };
+
     const login = user => {
         setUser(user);
     };
@@ -51,7 +56,9 @@ const AuthContext = ({ children }) => {
     };
 
     return (
-        <userContext.Provider value={{ user, login, logout, loading }}>
+        <userContext.Provider
+            value={{ user, register, login, logout, loading }}
+        >
             {children}
         </userContext.Provider>
     );

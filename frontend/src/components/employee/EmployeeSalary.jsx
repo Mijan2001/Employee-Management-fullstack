@@ -35,7 +35,7 @@ const EmployeeSalary = () => {
                 </div>
                 <table className="w-full table-auto border-collapse">
                     <thead>
-                        <tr className="bg-gray-200">
+                        <tr className="bg-gray-200 text-left">
                             <th className="px-2 py-2">SNO</th>
                             <th className="px-2 py-2">EMP ID</th>
                             <th className="px-2 py-2">SALARY</th>

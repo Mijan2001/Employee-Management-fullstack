@@ -24,9 +24,21 @@ const navItems = [
         href: '/admin-dashboard/departments',
         icon: BuildingOffice2Icon
     },
-    { name: 'Leaves', href: '/admin-leaves', icon: CalendarDaysIcon },
-    { name: 'Salary', href: '/admin-salary', icon: CurrencyDollarIcon },
-    { name: 'Setting', href: '/admin-setting', icon: Cog6ToothIcon }
+    {
+        name: 'Leaves',
+        href: '/admin-dashboard/leave',
+        icon: CalendarDaysIcon
+    },
+    {
+        name: 'Salary',
+        href: '/admin-dashboard/salary',
+        icon: CurrencyDollarIcon
+    },
+    {
+        name: 'Setting',
+        href: '/admin-dashboard/setting',
+        icon: Cog6ToothIcon
+    }
 ];
 
 const AdminSidebar = () => {
@@ -35,7 +47,7 @@ const AdminSidebar = () => {
     return (
         <>
             {/* Mobile top bar */}
-            <div className="md:hidden  justify-between bg-[#23293b] text-white px-4 py-3 shadow">
+            <div className="md:hidden  justify-between fixed items-center px-4 py-4 ">
                 {/* <div className="text-xl font-bold font-cursive tracking-wide">
                     Employee MS
                 </div> */}
@@ -43,7 +55,7 @@ const AdminSidebar = () => {
                     {open ? (
                         <XMarkIcon className="h-9 w-9" />
                     ) : (
-                        <Bars3Icon className="h-9 w-9" />
+                        <Bars3Icon className="h-9 w-9 font-bold text-3xl" />
                     )}
                 </button>
             </div>

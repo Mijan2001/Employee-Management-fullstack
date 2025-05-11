@@ -40,12 +40,12 @@ const EmployeeSidebar = () => {
     return (
         <>
             {/* Mobile top bar */}
-            <div className="md:hidden justify-between bg-[#23293b] text-white px-4 py-3 shadow">
+            <div className="md:hidden fixed justify-between items-center px-4 py-4 ">
                 <button onClick={() => setOpen(!open)}>
                     {open ? (
                         <XMarkIcon className="h-9 w-9" />
                     ) : (
-                        <Bars3Icon className="h-9 w-9" />
+                        <Bars3Icon className="h-9 w-9 font-bold text-3xl " />
                     )}
                 </button>
             </div>

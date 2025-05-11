@@ -58,8 +58,8 @@ const EmployeeLeave = () => {
     );
 
     return (
-        <div className="bg-gray-100 min-h-screen p-8">
-            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-gray-100 min-h-screen sm:p-8">
+            <div className="max-w-9xl mx-auto bg-white rounded-xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-center mb-6">
                     Manage Leaves
                 </h2>
@@ -142,7 +142,7 @@ const EmployeeLeave = () => {
                 )}
                 <table className="w-full table-auto border-collapse">
                     <thead>
-                        <tr className="bg-gray-200">
+                        <tr className="bg-gray-200 text-left">
                             <th className="px-2 py-2">SNO</th>
                             <th className="px-2 py-2">LEAVE TYPE</th>
                             <th className="px-2 py-2">FROM</th>
@@ -191,7 +191,16 @@ const EmployeeLeave = () => {
                                         ).toLocaleDateString()}
                                     </td>
                                     <td className="px-2 py-2">
-                                        {leave.status}
+                                        <span
+                                            className={`
+      px-3 py-1 rounded-full text-sm font-medium
+      ${leave.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+      ${leave.status === 'Approved' ? 'bg-green-100 text-green-800' : ''}
+      ${leave.status === 'Rejected' ? 'bg-red-100 text-red-800' : ''}
+    `}
+                                        >
+                                            {leave.status}
+                                        </span>
                                     </td>
                                 </tr>
                             ))

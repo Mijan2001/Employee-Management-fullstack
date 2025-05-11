@@ -11,14 +11,14 @@ const EmployeeDashboard = () => {
     console.log('AdminSIdebr.jsx user == ', user);
 
     return (
-        <div className="flex">
+        <div className="flex  ">
             {user && user?.role === 'admin' ? (
                 <AdminSidebar />
             ) : (
                 <EmployeeSidebar />
             )}
 
-            <div className="flex-1  bg-gray-100 h-screen">
+            <div className="flex-1 bg-gray-100 h-screen">
                 <Navbar />
                 <Outlet />
                 {/* <AdminSummary /> */}

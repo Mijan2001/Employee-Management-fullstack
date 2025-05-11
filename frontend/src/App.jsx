@@ -16,6 +16,7 @@ import ChangePassword from './components/dashboard/ChangePassword';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import EmployeeLeave from './components/employee/EmployeeLeave';
 import EmployeeSalary from './components/employee/EmployeeSalary';
+import Register from './pages/Register';
 
 function App() {
     return (
@@ -27,6 +28,7 @@ function App() {
                         element={<Navigate to="/admin-dashboard" />}
                     />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                     <Route
                         path="/admin-dashboard"
                         element={
@@ -49,6 +51,18 @@ function App() {
                         <Route
                             path="/admin-dashboard/employees"
                             element={<EmployeeList />}
+                        />
+                        <Route
+                            path="/admin-dashboard/leave"
+                            element={<EmployeeLeave />}
+                        />
+                        <Route
+                            path="/admin-dashboard/salary"
+                            element={<EmployeeSalary />}
+                        />
+                        <Route
+                            path="/admin-dashboard/setting"
+                            element={<ChangePassword />}
                         />
                     </Route>
                     <Route
