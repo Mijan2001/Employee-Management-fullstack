@@ -13,7 +13,9 @@ import {
     getSalaryById,
     getSalaries,
     updateSalary,
-    deleteSalary
+    deleteSalary,
+    getEmployeeLeaves,
+    addEmployeeLeave
 } from '../controllers/employeeController.js';
 
 // utils/multer.js
@@ -48,6 +50,10 @@ const upload = multer({
 });
 
 const router = express.Router();
+
+// Leave routes for employee
+router.get('/leave', authMiddleware, getEmployeeLeaves);
+router.post('/leave', authMiddleware, addEmployeeLeave);
 
 // Salary routes first
 router.get('/salary', authMiddleware, getSalaries);

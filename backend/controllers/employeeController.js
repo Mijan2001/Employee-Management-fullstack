@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import Leave from '../models/Leave.js';
 
 import { uploadImage, deleteImage } from '../utils/cloudinary.js';
 
@@ -509,6 +510,49 @@ export const getSalaryById = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             message: 'Error fetching salary',
+            error: error.message
+        });
+    }
+};
+
+// Get all leaves for the logged-in employee
+export const getEmployeeLeaves = async (req, res) => {
+    try {
+        console.log('Mijan');
+        const leaves = await Leave.find({ user: req.user?._id }).sort({
+            appliedDate: -1
+        });
+        console.log('leave == ', leaves);
+        res.status(200).json(leaves);
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error fetching leaves',
+            error: error.message
+        });
+    }
+};
+
+// Add a new leave for the logged-in employee
+export const addEmployeeLeave = async (req, res) => {
+    try {
+        const { leaveType, from, to, description } = req.body;
+        if (!leaveType || !from || !to || !description) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+        const leave = new Leave({
+            user: req.user._id,
+            leaveType,
+            from,
+            to,
+            description,
+            appliedDate: new Date(),
+            status: 'Pending'
+        });
+        await leave.save();
+        res.status(201).json({ message: 'Leave applied successfully', leave });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error applying leave',
             error: error.message
         });
     }

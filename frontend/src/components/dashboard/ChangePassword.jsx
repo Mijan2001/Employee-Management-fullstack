@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+const { VITE_API_URL } = import.meta.env || 'http://localhost:5000';
 
 const ChangePassword = () => {
+    const navigate = useNavigate();
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,7 +27,7 @@ const ChangePassword = () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.post(
-                '/api/auth/change-password',
+                `${VITE_API_URL}/api/auth/change-password`,
                 { oldPassword, newPassword },
                 {
                     headers: {
@@ -32,9 +35,13 @@ const ChangePassword = () => {
                     }
                 }
             );
+            console.log('response ok === ', response);
             setSuccess(
                 response.data.message || 'Password changed successfully!'
             );
+            if (response.status) {
+                navigate('/employee-dashboard');
+            }
             setOldPassword('');
             setNewPassword('');
             setConfirmPassword('');

@@ -14,6 +14,8 @@ import AddDepartment from './components/department/AddDepartment';
 import EmployeeProfile from './components/dashboard/EmployeeProfile';
 import ChangePassword from './components/dashboard/ChangePassword';
 import EmployeeDashboard from './pages/EmployeeDashboard';
+import EmployeeLeave from './components/employee/EmployeeLeave';
+import EmployeeSalary from './components/employee/EmployeeSalary';
 
 function App() {
     return (
@@ -62,6 +64,8 @@ function App() {
                         <Route index element={<EmployeeList />} />
                         <Route path="profile" element={<EmployeeProfile />} />
                         <Route path="setting" element={<ChangePassword />} />
+                        <Route path="leave" element={<EmployeeLeave />} />
+                        <Route path="salary" element={<EmployeeSalary />} />
                         <Route
                             path="/employee-dashboard/employees"
                             element={<EmployeeList />}
