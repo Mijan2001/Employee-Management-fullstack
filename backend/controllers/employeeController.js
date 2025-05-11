@@ -80,15 +80,17 @@ export const addEmployee = async (req, res) => {
             designation,
             salary,
             role,
-            password
+            password,
+            imageUrl
         } = req.body;
 
-        let imageUrl = '';
+        // let imageUrl = '';
 
         // Handle image upload if file exists
         if (req.file) {
             try {
                 imageUrl = await uploadImage(req.file.path);
+                console.log('addImage imageUrl == ', imageUrl);
                 // Clean up temporary file
                 fs.unlinkSync(req.file.path);
             } catch (error) {
@@ -210,6 +212,7 @@ export const deleteEmployee = async (req, res) => {
 export const getEmployeeById = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log('getEmployeeById id == ', id);
         const employee = await Employee.findById(id)
             .populate('salaries')
             .lean();

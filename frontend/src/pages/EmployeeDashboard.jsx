@@ -6,7 +6,7 @@ import AdminSummary from '../components/dashboard/AdminSummary';
 import { Outlet } from 'react-router-dom';
 import EmployeeSidebar from '../components/dashboard/EmployeeSidebar';
 
-const AdminDashboard = () => {
+const EmployeeDashboard = () => {
     const { user } = useAuth();
     console.log('AdminSIdebr.jsx user == ', user);
 
@@ -27,4 +27,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default EmployeeDashboard;

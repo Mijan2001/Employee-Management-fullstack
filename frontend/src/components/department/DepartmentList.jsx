@@ -166,7 +166,7 @@ const DepartmentList = () => {
 
     return (
         <div className="p-4 sm:p-8 min-h-screen">
-            <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8">
+            <div className="max-w-9xl mx-auto bg-white sm:p-8">
                 {error && (
                     <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
                         {error}
@@ -241,7 +241,7 @@ const DepartmentList = () => {
                                         {editId === dept._id ? (
                                             <>
                                                 <button
-                                                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded transition"
+                                                    className="bg-teal-600 hover:bg-teal-700 text-white w-[60px] text-center py-1.5 rounded transition"
                                                     onClick={() =>
                                                         handleEdit(dept._id)
                                                     }
@@ -250,7 +250,7 @@ const DepartmentList = () => {
                                                     Save
                                                 </button>
                                                 <button
-                                                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-1.5 rounded transition"
+                                                    className="bg-gray-400 hover:bg-gray-500 text-white w-[60px] text-center py-1.5 rounded transition"
                                                     onClick={() =>
                                                         setEditId(null)
                                                     }
@@ -262,7 +262,7 @@ const DepartmentList = () => {
                                         ) : (
                                             <>
                                                 <button
-                                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded transition"
+                                                    className="bg-green-500 hover:bg-green-600 w-[60px] text-center text-white  py-1.5 rounded transition"
                                                     onClick={() => {
                                                         setEditId(dept._id);
                                                         setEditValue(dept.name);
@@ -272,7 +272,7 @@ const DepartmentList = () => {
                                                     Edit
                                                 </button>
                                                 <button
-                                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded transition"
+                                                    className="bg-red-500 w-[60px] text-center hover:bg-red-600 text-white  py-1.5 rounded transition"
                                                     onClick={() =>
                                                         handleDelete(dept._id)
                                                     }

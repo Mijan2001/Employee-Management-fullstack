@@ -5,9 +5,6 @@ const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'];
 const ROLES = ['Admin', 'Manager', 'Employee'];
 
 const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
-    console.log(import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-    console.log(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-
     const fileInputRef = useRef(null);
 
     const [form, setForm] = useState({
@@ -83,6 +80,8 @@ const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
             }
         );
 
+        console.log('addEmpoyee.jsx response === ', response);
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
@@ -91,6 +90,7 @@ const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
         }
 
         const data = await response.json();
+        console.log('addEmpoyee.jsx data === ', data);
         return data.secure_url;
     };
 
@@ -123,6 +123,7 @@ const AddEmployee = ({ open, onAdd, onClose, departments = [] }) => {
             if (form.image) {
                 try {
                     imageUrl = await uploadToCloudinary(form.image);
+                    console.log('addEmployee.jsx imageUrl === ', imageUrl);
                 } catch (uploadError) {
                     throw new Error(
                         `Image upload failed: ${uploadError.message}`

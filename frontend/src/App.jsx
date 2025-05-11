@@ -11,6 +11,10 @@ import AdminSummary from './components/dashboard/AdminSummary';
 import DepartmentList from './components/department/DepartmentList';
 import AddDepartment from './components/department/AddDepartment';
 
+import EmployeeProfile from './components/dashboard/EmployeeProfile';
+import ChangePassword from './components/dashboard/ChangePassword';
+import EmployeeDashboard from './pages/EmployeeDashboard';
+
 function App() {
     return (
         <>
@@ -42,6 +46,24 @@ function App() {
                         />
                         <Route
                             path="/admin-dashboard/employees"
+                            element={<EmployeeList />}
+                        />
+                    </Route>
+                    <Route
+                        path="/employee-dashboard"
+                        element={
+                            <PrivateRoutes>
+                                <RoleBaseRoutes requiredRole={['employee']}>
+                                    <EmployeeDashboard />
+                                </RoleBaseRoutes>
+                            </PrivateRoutes>
+                        }
+                    >
+                        <Route index element={<EmployeeList />} />
+                        <Route path="profile" element={<EmployeeProfile />} />
+                        <Route path="setting" element={<ChangePassword />} />
+                        <Route
+                            path="/employee-dashboard/employees"
                             element={<EmployeeList />}
                         />
                     </Route>

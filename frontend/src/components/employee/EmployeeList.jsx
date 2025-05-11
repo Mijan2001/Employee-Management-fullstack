@@ -42,6 +42,7 @@ const EmployeeList = () => {
                     }
                 }
             );
+            console.log('EmployeeList.jsx response === ', response);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(
@@ -49,6 +50,7 @@ const EmployeeList = () => {
                 );
             }
             const data = await response.json();
+            console.log('EmployeeList.jsx data === ', data);
             setEmployees(data.employees);
             setTotalPages(data.totalPages);
             setTotalEmployees(data.totalEmployees);
@@ -136,16 +138,16 @@ const EmployeeList = () => {
     };
 
     const handleAdd = async employeeData => {
+        console.log('employeeList.jsx empoyeeData === ', employeeData);
         try {
             setLoading(true);
             setErrorMessage('');
 
             // Handle image upload if there's an image
             let finalData = { ...employeeData };
-            console.log('employeelist.jsx finalData == ', finalData);
-            if (employeeData.image) {
+            if (employeeData.imageUrl) {
                 const data = new FormData();
-                data.append('file', employeeData.image);
+                data.append('file', employeeData.imageUrl);
                 data.append(
                     'upload_preset',
                     import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
@@ -165,8 +167,6 @@ const EmployeeList = () => {
                     }
                 );
 
-                console.log('employeelist.jsx res == ', res);
-
                 if (!res.ok) {
                     const errorData = await res.json();
                     throw new Error(
@@ -176,7 +176,7 @@ const EmployeeList = () => {
 
                 const cloudinaryData = await res.json();
                 console.log(
-                    'employeelist.jsx cloudinaryData == ',
+                    'employeeList.jsx cloudinaryData === ',
                     cloudinaryData
                 );
                 if (!cloudinaryData.secure_url) {
@@ -202,6 +202,8 @@ const EmployeeList = () => {
                 },
                 body: JSON.stringify(finalData)
             });
+
+            console.log('EmpoyeeList.jsx response === ', response);
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -409,7 +411,7 @@ const EmployeeList = () => {
             const response = await fetch(
                 `${VITE_API_URL}/api/employee/salary/${salaryId}`,
                 {
-                    method: 'PUT',
+                    method: 'GET',
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
@@ -466,7 +468,7 @@ const EmployeeList = () => {
                     {errorMessage}
                 </div>
             )}
-            <div className="max-w-5xl mx-auto bg-white p-4 sm:p-8 rounded-lg shadow">
+            <div className="max-w-9xl mx-auto bg-white  sm:p-8 rounded-lg">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
                     <input
                         type="text"
@@ -538,13 +540,13 @@ const EmployeeList = () => {
                                     </td>
                                     <td className="py-3 justify-center px-4 flex flex-wrap gap-2">
                                         <button
-                                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded transition"
+                                            className="bg-blue-500 hover:bg-blue-600 text-white w-[60px] text-center py-1.5 rounded transition"
                                             onClick={() => handleView(emp._id)}
                                         >
                                             View
                                         </button>
                                         <button
-                                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded transition"
+                                            className="bg-green-500 hover:bg-green-600 text-white w-[60px] text-center py-1.5 rounded transition"
                                             onClick={() => handleEdit(emp._id)}
                                         >
                                             Edit
@@ -553,12 +555,12 @@ const EmployeeList = () => {
                                             onClick={() =>
                                                 handleSalary(emp?._id)
                                             }
-                                            className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1.5 rounded transition"
+                                            className="bg-yellow-400 hover:bg-yellow-500 text-white w-[60px] text-center py-1.5 rounded transition"
                                         >
                                             Salary
                                         </button>
                                         <button
-                                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded transition"
+                                            className="bg-red-500 hover:bg-red-600 text-white w-[60px] text-center py-1.5 rounded transition"
                                             onClick={() =>
                                                 handleDelete(emp._id)
                                             }
@@ -650,6 +652,7 @@ const EmployeeList = () => {
                 employees={employees}
                 initialData={salaryInitialData}
             />
+
             <div className="mt-10">
                 <h2 className="text-xl font-bold mb-4">Salaries</h2>
                 <div className="overflow-x-auto rounded-md border border-gray-200">
@@ -696,7 +699,7 @@ const EmployeeList = () => {
                                     </td>
                                     <td className="py-3 px-4 flex gap-2">
                                         <button
-                                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                                            className="bg-green-500 hover:bg-green-600 text-white w-[60px] text-center py-1 rounded"
                                             onClick={() =>
                                                 handleEditSalary(sal._id)
                                             }
@@ -704,7 +707,7 @@ const EmployeeList = () => {
                                             Edit
                                         </button>
                                         <button
-                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                                            className="bg-red-500 hover:bg-red-600 text-white w-[60px] text-center py-1 rounded"
                                             onClick={() =>
                                                 handleDeleteSalary(sal._id)
                                             }

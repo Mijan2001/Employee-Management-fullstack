@@ -64,3 +64,53 @@ export const verify = async (req, res) => {
         return res.status(500).json({ success: false, error: error.message });
     }
 };
+
+// @desc    Change password
+// @route   POST /api/auth/change-password
+// @access  Private
+export const changePassword = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res
+                .status(400)
+                .json({ success: false, message: 'All fields are required.' });
+        }
+
+        // Find user (works for both User and Employee)
+        let user = await User.findById(userId);
+        if (!user) {
+            // Try Employee model if not found in User
+            const Employee = (await import('../models/Employee.js')).default;
+            user = await Employee.findById(userId);
+            if (!user) {
+                return res
+                    .status(404)
+                    .json({ success: false, message: 'User not found.' });
+            }
+        }
+
+        // Check old password
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({
+                success: false,
+                message: 'Old password is incorrect.'
+            });
+        }
+
+        // Hash new password and update
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Password changed successfully.'
+        });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
