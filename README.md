@@ -2,7 +2,7 @@
 
 A full-stack web application for managing employee information, built with modern technologies and best practices.
 
-Admin Emil : abc@gmail.com
+Admin Email : abc@gmail.com
 Admin Password : 12345678
 
 ## Project Photo
