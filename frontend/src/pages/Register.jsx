@@ -3,7 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/authContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const { VITE_API_URL } = import.meta.env || 'http://localhost:5000';
 
@@ -207,6 +207,15 @@ const Register = () => {
                         </a>
                     </div>
 
+                    <p className="text-center text-sm text-gray-600">
+                        <span className="mr-1">Already have an account?</span>
+                        <Link
+                            to="/login"
+                            className="text-blue-600 font-medium hover:underline hover:text-blue-800 transition-colors duration-200"
+                        >
+                            Login
+                        </Link>
+                    </p>
                     {/* Submit Button */}
                     <button
                         type="submit"

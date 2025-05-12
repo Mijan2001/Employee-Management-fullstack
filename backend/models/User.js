@@ -21,6 +21,23 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         profileImage: { type: String },
+        employee: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Employee'
+        },
+        department: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Department'
+        },
+        leave: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Leave'
+        },
+        salary: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Salary'
+        },
+
         createdAt: {
             type: Date,
             default: Date.now

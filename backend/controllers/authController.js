@@ -1,6 +1,10 @@
 import User from './../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import Leave from './../models/Leave.js';
+import Salary from './../models/Salary.js';
+import Employee from '../models/Employee.js';
+import Department from '../models/Department.js';
 
 // @desc    Login user
 // @route   POST /api/auth/login
@@ -179,5 +183,99 @@ export const register = async (req, res) => {
     } catch (error) {
         console.error('authController.js : Error during registration:', error);
         return res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const adminDashboardStats = async (req, res) => {
+    try {
+        // Get total employees count
+        const totalEmployees = await Employee.countDocuments();
+
+        // Get total departments count
+        const totalDepartments = await Department.countDocuments();
+
+        // Get total salary statistics
+        const salaryStats = await Salary.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalSalary: { $sum: '$basicSalary' },
+                    totalAllowances: { $sum: '$allowances' },
+                    totalDeductions: { $sum: '$deductions' },
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Get leave statistics
+        const leaveStats = await Leave.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Get department-wise employee count
+        const departmentStats = await Employee.aggregate([
+            {
+                $group: {
+                    _id: '$department',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Format leave statistics
+        const leaveStatistics = leaveStats.reduce(
+            (acc, curr) => {
+                acc[curr._id] = curr.count;
+                return acc;
+            },
+            {
+                Pending: 0,
+                Approved: 0,
+                Rejected: 0
+            }
+        );
+
+        // Format response
+        const response = {
+            success: true,
+            data: {
+                employees: {
+                    total: totalEmployees,
+                    byDepartment: departmentStats
+                },
+                departments: {
+                    total: totalDepartments
+                },
+                salary: {
+                    total: salaryStats[0]?.totalSalary || 0,
+                    totalAllowances: salaryStats[0]?.totalAllowances || 0,
+                    totalDeductions: salaryStats[0]?.totalDeductions || 0,
+                    count: salaryStats[0]?.count || 0
+                },
+                leaves: {
+                    total: Object.values(leaveStatistics).reduce(
+                        (a, b) => a + b,
+                        0
+                    ),
+                    pending: leaveStatistics.Pending || 0,
+                    approved: leaveStatistics.Approved || 0,
+                    rejected: leaveStatistics.Rejected || 0
+                }
+            }
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        console.error('Error fetching admin dashboard stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching dashboard statistics',
+            error: error.message
+        });
     }
 };

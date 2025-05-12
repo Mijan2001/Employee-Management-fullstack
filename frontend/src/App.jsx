@@ -17,16 +17,34 @@ import EmployeeDashboard from './pages/EmployeeDashboard';
 import EmployeeLeave from './components/employee/EmployeeLeave';
 import EmployeeSalary from './components/employee/EmployeeSalary';
 import Register from './pages/Register';
+import Home from './pages/Home';
+import { useAuth } from './context/authContext';
 
 function App() {
+    const { user } = useAuth();
+
+    console.log('use in app.jsx = ', user);
+
     return (
         <>
             <BrowserRouter>
                 <Routes>
-                    <Route
-                        path="/"
-                        element={<Navigate to="/admin-dashboard" />}
-                    />
+                    {user ? (
+                        user?.role === 'admin' ? (
+                            <Route
+                                path="/"
+                                element={<Navigate to="/admin-dashboard" />}
+                            />
+                        ) : (
+                            <Route
+                                path="/"
+                                element={<Navigate to="/employee-dashboard" />}
+                            />
+                        )
+                    ) : (
+                        <Route path="/" element={<Home />} />
+                    )}
+
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route

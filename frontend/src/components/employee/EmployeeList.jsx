@@ -658,21 +658,21 @@ const EmployeeList = () => {
                 <div className="overflow-x-auto rounded-md border border-gray-200">
                     <table className="min-w-full text-sm text-gray-700">
                         <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                            <tr>
+                            <tr className="text-left">
                                 <th className="py-3 px-4">Department</th>
                                 <th className="py-3 px-4">Employee</th>
                                 <th className="py-3 px-4">Basic Salary</th>
                                 <th className="py-3 px-4">Allowances</th>
                                 <th className="py-3 px-4">Deductions</th>
                                 <th className="py-3 px-4">Pay Date</th>
-                                <th className="py-3 px-4">Action</th>
+                                <th className="py-3  px-4">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {salaries.map(sal => (
                                 <tr
                                     key={sal._id}
-                                    className="border-b border-gray-200"
+                                    className="border-b  border-gray-200"
                                 >
                                     <td className="py-3 px-4">
                                         {sal.department}
@@ -697,7 +697,7 @@ const EmployeeList = () => {
                                               ).toLocaleDateString()
                                             : '-'}
                                     </td>
-                                    <td className="py-3 px-4 flex gap-2">
+                                    <td className="py-3  px-4 flex gap-2">
                                         <button
                                             className="bg-green-500 hover:bg-green-600 text-white w-[60px] text-center py-1 rounded"
                                             onClick={() =>
