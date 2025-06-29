@@ -106,6 +106,13 @@ const Home = () => {
                     Login
                 </Link>
 
+                <Link
+                    to="/admin-dashboard"
+                    className="px-6 z-50 border-1 absolute right-4 top-2 mb-20 border-white py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-md shadow-md hover:shadow-pink-500/50 transition duration-300"
+                >
+                    Admin
+                </Link>
+
                 <div className="absolute inset-0 bg-black/40" />
                 <div className="relative w-full max-w-7xl mx-auto pt-10 p-4 h-full flex flex-col items-center justify-center">
                     <h1
