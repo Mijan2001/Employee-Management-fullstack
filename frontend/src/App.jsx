@@ -30,7 +30,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     {/* this code is original==============  */}
-                    {/* {user ? (
+                    {user ? (
                         user?.role === 'admin' ? (
                             <Route
                                 path="/"
@@ -44,11 +44,11 @@ function App() {
                         )
                     ) : (
                         <Route path="/" element={<Home />} />
-                    )} */}
+                    )}
 
                     {/* this code is just testing purpose start ==============  */}
 
-                    <Route
+                    {/* <Route
                         path="/"
                         element={<Navigate to="/admin-dashboard" />}
                     />
@@ -58,7 +58,7 @@ function App() {
                         element={<Navigate to="/employee-dashboard" />}
                     />
 
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<Home />} /> */}
 
                     {/* this code is just testing purpose end ==============  */}
 
