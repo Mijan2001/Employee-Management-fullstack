@@ -106,6 +106,7 @@ const Home = () => {
                     Login
                 </Link>
 
+                {/* added this Admin button for testing purpose  */}
                 <Link
                     to="/admin-dashboard"
                     className="px-6 z-50 border-1 absolute right-4 top-2 mb-20 border-white py-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-md shadow-md hover:shadow-pink-500/50 transition duration-300"
