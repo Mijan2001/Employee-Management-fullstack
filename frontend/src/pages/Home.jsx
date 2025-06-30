@@ -93,6 +93,18 @@ const Home = () => {
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
             {/* Hero Section with Carousel */}
+
+            {/* marque tag scroll from right to left  */}
+            {/* <marqspuee
+                direction="left"
+                className="absolute top-0 w-full z-50 bg-black text-white text-lg font-medium py-2"
+            >
+                Admin email : mijan.cse19@gamil.com, password : 12345678
+            </marqspuee> */}
+            <span className="absolute top-0 w-full z-50 bg-black text-center text-white text-lg font-medium py-2">
+                Admin email : mijan.cse19@gmail.com, password : 12345678
+            </span>
+
             <div
                 className="relative h-[60vh] bg-cover bg-center"
                 style={{
