@@ -102,7 +102,8 @@ const Home = () => {
                 Admin email : mijan.cse19@gamil.com, password : 12345678
             </marqspuee> */}
             <span className="absolute top-0 w-full z-50 bg-black text-center text-white text-lg font-medium py-2">
-                Admin email : mijan.cse19@gmail.com, password : 12345678
+                Admin email : mijan.cse19@gmail.com, password : 12345678,project
+                video link : https://youtu.be/6gMoyG0b1hc
             </span>
 
             <div

@@ -2,7 +2,9 @@
 
 A full-stack web application for managing employee information, built with modern technologies and best practices.
 
-Admin Email : abc@gmail.com
+## Project Video Link : https://youtu.be/6gMoyG0b1hc
+
+Admin Email : mijan.cse19@gmail.com
 Admin Password : 12345678
 
 ## Project Photo
